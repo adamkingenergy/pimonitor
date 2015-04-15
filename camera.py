@@ -21,24 +21,7 @@ def video_loop(videosocket, jpegsocket, eventsocket, config):
     on ZeroMQ socket for recording and watching on other
     devices.
     """
-
-    magnitude_threshold = config['motion']['magnitude_threshold']
-    block_threshold = config['motion']['block_threshold']
-
-    bitrate = config['camera']['bitrate']
-    framerate = config['camera']['framerate']
-
-    net_frame_size = config['network']['net_frame_size']
-    
-    with picamera.PiCamera() as camera:
-        with zmqoutput.ZeroMqOutput(videosocket, net_frame_size) as video_output:
-    
-            with motiondetection.VectorThresholdMotionDetect(motion_event_handler, 
-                                                             magnitude_threshold,
-                                                             block_threshold,
-                                                             camera) as motiondetector:
-        
-                camera.start_recording(video_output, format='h264', motion_output=motiondetector)
+                camera.start_recording(video_output, format='h264', motion_output=motion_detector)
 
                 # The camera is up and running so now we poll JPEG request socket for
                 # any requests for a JPEG still which is delivered piece by piece.
@@ -59,17 +42,20 @@ def handle_jpeg_request(camera, jpegsocket, net_frame_size, address, req):
             jpeg_requests[address].close()
             del jpeg_requests[address]
 
+        # Create new stream and capture image to memory.
         jpeg_requests[address] = io.BytesIO()
         camera.capture(jpeg_requests[address], use_video_port=True)
-        jpegsocket.send_multipart([address, b'', jpeg_requests[address].read(net_frame_size)])
+        data = jpeg_requests[address].read(net_frame_size)
 
     elif req == 'NEXT':
         # Check for still in progress and send next frame.
-
+        data = jpeg_requests[address].read(net_frame_size)
 
     elif req == 'ENDACK':
         # Transfer is complete and file acknowledged.
-
+        data = b''
+        
+    jpegsocket.send_multipart([address, b'', data])
 
 
 def main():
@@ -96,9 +82,28 @@ def main():
     log.info('Binding jpeg socket to port %i.', jpegport)
     jpegsocket = context.socket(zmq.ROUTER)
     jpegsocket.bind('tcp://*:%s' % jpegport)
+
+    log.info('Assembling configuration variables.')
+    magnitude_threshold = config['motion']['magnitude_threshold']
+    block_threshold = config['motion']['block_threshold']
+
+    bitrate = config['camera']['bitrate']
+    framerate = config['camera']['framerate']
+
+    net_frame_size = config['network']['net_frame_size']
+
+    with picamera.PiCamera() as camera:
+        with zmqoutput.ZeroMqOutput(videosocket, net_frame_size) as video_output:
     
-    log.info('Entering video processing loop.')
-    video_loop(videosocket, jpegsocket, eventsocket, configdata)
+            with motiondetection.VectorThresholdMotionDetect(motion_event_handler, 
+                                                             magnitude_threshold,
+                                                             block_threshold,
+                                                             camera) as motion_detector:
+        
+
+    
+                log.info('Entering video processing loop.')
+                video_loop(camera, video_output, motion_detector)
 
 
 if __name__ == '__main__':
