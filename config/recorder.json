@@ -1,0 +1,8 @@
+{
+  'network':
+    {'h264_sub_port': 5876,
+     'jpeg_req_port': 5877},
+
+  'camera':
+    {}
+}

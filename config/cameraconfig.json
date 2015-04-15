@@ -1,0 +1,10 @@
+
+{
+  "network":
+    {"h264_pub_port":      5876,
+     "jpeg_router_port":   5877},
+
+  "camera":
+    {}
+}
+
