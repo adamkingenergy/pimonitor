@@ -10,8 +10,8 @@ def load_from_file(filename):
   """Read configuration from specified JSON file
   and return as python dictionary.
   """
-  log.info('Reading configuration from %s.', filename)
   with open(filename, 'r') as configfile:
+    log.debug('Config opened (%s), reading JSON.', filename)
     return json.load(configfile)
 
 
