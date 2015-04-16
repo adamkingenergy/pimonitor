@@ -15,7 +15,7 @@ import zmqoutput
 log = logging.getLogger(__name__)
 
 
-def stills_event_loop(jpegsocket, camera, config):
+def stills_event_loop(jpegsocket, camera, net_frame_size):
     """This function handles any incoming requests for JPEG stills.
     Any clients requesting stills receive back chunks of the file
     and must send continuation requests.
@@ -62,13 +62,13 @@ def main():
     log.info('Loading config from %s.', configfile)
     configdata = config.load_from_file(configfile)
     
-    magnitude_threshold = config['motion']['magnitude_threshold']
-    block_threshold = config['motion']['block_threshold']
+    magnitude_threshold = configdata['motion']['magnitude_threshold']
+    block_threshold = configdata['motion']['block_threshold']
 
-    bitrate = config['camera']['bitrate']
-    framerate = config['camera']['framerate']
+    bitrate = configdata['camera']['bitrate']
+    framerate = configdata['camera']['framerate']
 
-    net_frame_size = config['network']['net_frame_size']
+    net_frame_size = configdata['network']['net_frame_size']
     eventport = configdata['network']['event_pub_port']
     videoport = configdata['network']['h264_pub_port']
     jpegport = configdata['network']['jpeg_router_port']
@@ -86,19 +86,17 @@ def main():
     jpegsocket = context.socket(zmq.ROUTER)
     jpegsocket.bind('tcp://*:%s' % jpegport)
 
-    with picamera.PiCamera() as camera:
+    with picamera.PiCamera() as camera,
+         zmqoutput.ZeroMqOutput(videosocket, net_frame_size) as video_output,
+         motiondetection.VectorThresholdMotionDetect(motion_event_handler, 
+                                                     magnitude_threshold,
+                                                     block_threshold,
+                                                     camera) as motion_detector:
 
-        with zmqoutput.ZeroMqOutput(videosocket, net_frame_size) as video_output:
-    
-            with motiondetection.VectorThresholdMotionDetect(motion_event_handler, 
-                                                             magnitude_threshold,
-                                                             block_threshold,
-                                                             camera) as motion_detector:
-        
-                log.info('Starting camera video capture.')
-                camera.start_recording(video_output, format='h264', motion_output=motion_detector)
-                log.info('Entering JPEG still event loop.')
-                stills_event_loop(camera, video_output, motion_detector)
+        log.info('Starting camera video capture.')
+        camera.start_recording(video_output, format='h264', motion_output=motion_detector)
+        log.info('Entering JPEG still event loop.')
+        stills_event_loop(jpegsocket, camera, net_frame_size)
 
 
 if __name__ == '__main__':
