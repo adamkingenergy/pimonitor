@@ -33,11 +33,14 @@ def main():
     videosocket.connect('tcp://%s:%s' % (cameraip, videoport))
     videosocket.setsockopt(zmq.SUBSCRIBE, '')
 
-    print eventsocket.recv()
+    print 'waiting for event...'
+    print eventsocket.recv_multipart()
 
     with open('test.h264', 'wb') as vidfile:    
         while True:
-            vidfile.write(videosocket.recv())
+            host, data = videosocket.recv_multipart()
+            print '%i bytes from %s' % (len(data), host)
+            vidfile.write(data)
             vidfile.flush()
     
 

@@ -60,7 +60,7 @@ def motion_event_handler(eventsocket):
     """Handle motion event using specified event socket.
     """
     log.info('Motion event detected.')
-    eventsocket.send('%s:MOTION:%s' % (hostname, datetime.datetime.now().isoformat()))
+    eventsocket.send_multipart([hostname, 'MOTION:%s' % datetime.datetime.now().isoformat()])
 
 
 def main():
@@ -95,7 +95,7 @@ def main():
     jpegsocket.bind('tcp://*:%s' % jpegport)
 
     with picamera.PiCamera() as camera, \
-         zmqoutput.ZeroMqOutput(videosocket, net_frame_size) as video_output, \
+         zmqoutput.ZeroMqOutput(videosocket, hostname, net_frame_size) as video_output, \
          motiondetection.VectorThresholdMotionDetect(motion_event_handler, 
                                                      magnitude_threshold,
                                                      block_threshold,
