@@ -15,7 +15,7 @@ import motiondetection
 import zmqoutput
 
 log = logging.getLogger(__name__)
-
+hostname = socket.gethostname()
 
 def stills_event_loop(jpegsocket, camera, net_frame_size):
     """This function handles any incoming requests for JPEG stills.
@@ -60,11 +60,10 @@ def motion_event_handler(eventsocket):
     """Handle motion event using specified event socket.
     """
     log.info('Motion event detected.')
-    eventsocket.send('MOTION:%s' % datetime.datetime.now().isoformat())
+    eventsocket.send('%s:MOTION:%s' % (hostname, datetime.datetime.now().isoformat()))
 
 
 def main():
-    hostname = socket.gethostname()
     log.info('Starting camera feed server on %s.', hostname)
     
     configfile = 'config/cameraconfig.json'
