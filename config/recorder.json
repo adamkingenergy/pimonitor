@@ -1,8 +1,11 @@
 {
-  'network':
-    {'h264_sub_port': 5876,
-     'jpeg_req_port': 5877},
+  "network":
+    {"camera_ip_addr":      "192.168.0.2",
+     "event_sub_port":      5875,
+     "h264_sub_port":       5876,
+     "net_frame_size":      4096},
 
-  'camera':
-    {}
+  "recorder":
+    {"event_log":           "~/cctvevents.log",
+     "recording_folder":    "~/cctvrecordings/"}
 }

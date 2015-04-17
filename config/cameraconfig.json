@@ -11,7 +11,7 @@
      "framerate":           10},
 
   "motion":
-    {"magnitude_threshold": 60,
-     "block_threshold":     10}
+    {"magnitude_threshold": 30,
+     "block_threshold":     15}
 }
 

@@ -2,9 +2,11 @@
 
 # General modules
 import io
+import sys
 import zmq
 import picamera
 import socket
+import datetime
 import logging
 
 # Project modules
@@ -54,6 +56,13 @@ def stills_event_loop(jpegsocket, camera, net_frame_size):
             jpegsocket.send_multipart([address, b'', data])
 
 
+def motion_event_handler(eventsocket):
+    """Handle motion event using specified event socket.
+    """
+    log.info('Motion event detected.')
+    eventsocket.send('MOTION:%s' % datetime.datetime.now().isoformat())
+
+
 def main():
     hostname = socket.gethostname()
     log.info('Starting camera feed server on %s.', hostname)
@@ -86,20 +95,38 @@ def main():
     jpegsocket = context.socket(zmq.ROUTER)
     jpegsocket.bind('tcp://*:%s' % jpegport)
 
-    with picamera.PiCamera() as camera,
-         zmqoutput.ZeroMqOutput(videosocket, net_frame_size) as video_output,
+    with picamera.PiCamera() as camera, \
+         zmqoutput.ZeroMqOutput(videosocket, net_frame_size) as video_output, \
          motiondetection.VectorThresholdMotionDetect(motion_event_handler, 
                                                      magnitude_threshold,
                                                      block_threshold,
+                                                     eventsocket,
                                                      camera) as motion_detector:
 
         log.info('Starting camera video capture.')
-        camera.start_recording(video_output, format='h264', motion_output=motion_detector)
-        log.info('Entering JPEG still event loop.')
+        camera.framerate = framerate
+        camera.start_recording(video_output,
+                               motion_output=motion_detector,
+                               format='h264', 
+                               inline_headers=True,
+                               bitrate=bitrate)
+        
+        log.info('Entering JPEG still event loop.')        
         stills_event_loop(jpegsocket, camera, net_frame_size)
 
 
+
 if __name__ == '__main__':
+    
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    root.addHandler(ch)
+
     main()
 
 
