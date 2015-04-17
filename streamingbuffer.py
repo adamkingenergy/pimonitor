@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from cStringIO import StringIO
 
 class StreamingBuffer(object):
