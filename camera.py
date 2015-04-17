@@ -75,6 +75,7 @@ def main():
 
     bitrate = configdata['camera']['bitrate']
     framerate = configdata['camera']['framerate']
+    resolution = configdata['camera']['resolution_x'], configdata['camera']['resolution_y']
 
     net_frame_size = configdata['network']['net_frame_size']
     eventport = configdata['network']['event_pub_port']
@@ -103,6 +104,7 @@ def main():
                                                      camera) as motion_detector:
 
         log.info('Starting camera video capture.')
+        camera.resolution = resolution
         camera.framerate = framerate
         camera.start_recording(video_output,
                                motion_output=motion_detector,
@@ -110,13 +112,15 @@ def main():
                                inline_headers=True,
                                bitrate=bitrate)
         
-        log.info('Entering JPEG still event loop.')        
-        stills_event_loop(jpegsocket, camera, net_frame_size)
-
+        try:
+            log.info('Entering JPEG still event loop.')        
+            stills_event_loop(jpegsocket, camera, net_frame_size)
+        finally:
+            camera.stop_recording()
 
 
 if __name__ == '__main__':
-    
+    # Setup logging    
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
 
@@ -126,6 +130,7 @@ if __name__ == '__main__':
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
+    # Start main execution
     main()
 
 

@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 # General modules
+import sys
 import zmq
 import logging
 import socket
+import datetime
 
 # Project modules
 import config
@@ -33,19 +35,48 @@ def main():
     videosocket.connect('tcp://%s:%s' % (cameraip, videoport))
     videosocket.setsockopt(zmq.SUBSCRIBE, '')
 
-    print 'waiting for event...'
-    print eventsocket.recv_multipart()
+    files = {}
 
-    with open('test.h264', 'wb') as vidfile:    
+    try:
         while True:
-            host, data = videosocket.recv_multipart()
-            print '%i bytes from %s' % (len(data), host)
-            vidfile.write(data)
-            vidfile.flush()
+            log.debug('Waiting to receive video publish.')
+            host, flag, data = videosocket.recv_multipart()
+
+            if flag == 'START':
+                log.debug('START feed from %s', host)
+                if host in files:
+                    files[host].close()
+                
+                newfilename = '%s-%s.h264' % (host, datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+                files[host] = open(newfilename, 'wb')
+
+            elif flag == 'END':
+                log.debug('END feed from %s', host)
+                if host in files:
+                    files[host].close()
+ 
+            elif flag == 'DATA':
+                if host in files:
+                    files[host].write(data)
+                    files[host].flush()
     
+    except Exception as ex:
+        for vidfile in files.itervalues():
+            vidfile.close()
+        raise
 
 
 if __name__ == '__main__':
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    root.addHandler(ch)
+
+
     main()
 
 

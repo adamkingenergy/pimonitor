@@ -10,6 +10,7 @@ class ZeroMqOutput(object):
         self.hostname = hostname
         self.framesize = framesize
         self.buffer = StreamingBuffer()
+        self.started = False
 
     def __enter__(self):
         return self
@@ -21,15 +22,24 @@ class ZeroMqOutput(object):
         # Add the incoming data to the buffer
         self.buffer.write(s)
 
+        if not self.started:
+            self.socket.send_multipart([self.hostname, 'START', ''])
+
+        self.started = True
+
         while self.buffer.available >= self.framesize:
-            self.socket.send_multipart([self.hostname, self.buffer.read(self.framesize)])
+            self.socket.send_multipart([self.hostname, 'DATA', self.buffer.read(self.framesize)])
             
     def flush(self):
-        # Only use SNDMORE if we have strictly more data that framesize.
-        # This leaves remaining data to be sent by final send (without SNDMORE)
+        if not self.started:
+            return
+
         while self.buffer.available > self.framesize:
-            self.socket.send_multipart([self.hostname, self.buffer.read(self.framesize)])
+            self.socket.send_multipart([self.hostname, 'DATA', self.buffer.read(self.framesize)])
 
-        self.socket.send_multipart([self.hostname, self.buffer.read()])
+        self.socket.send_multipart([self.hostname, 'DATA', self.buffer.read()])
 
+    def close(self):
+        self.sockket.send_multipart([self.hostname, 'END', ''])
+        self.started = False
 

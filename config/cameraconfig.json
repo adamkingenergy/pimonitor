@@ -8,7 +8,9 @@
 
   "camera":
     {"bitrate":             800000,
-     "framerate":           10},
+     "framerate":           10,
+     "resolution_x":        1920,
+     "resolution_y":        1080},
 
   "motion":
     {"magnitude_threshold": 30,
