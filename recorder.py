@@ -103,7 +103,7 @@ def main():
                     event_data = {'host': host, 'event': event, 'time': time}
 
                     # Write the event data to the log file.
-                    with open(event_log, 'a') as event_log_file:
+                    with open(event_log, 'a+') as event_log_file:
                         event_log_file.write((event_log_format % event_data) + '\n')
 
                 else:
