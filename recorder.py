@@ -19,9 +19,11 @@ def main():
     hostname = socket.gethostname()
     log.info('Starting recording client on %s.', hostname)
 
-    network_config = config.load_from_file('config/network.json')
-    camera_config = config.load_from_file('config/camera.json')
-    recorder_config = config.load_from_file('config/recorder.json')
+    module_dir = os.path.dirname(__file__)
+
+    network_config = config.load_from_file(os.path.join(module_dir, 'config/network.json'))
+    camera_config = config.load_from_file(os.path.join(module_dir, 'config/camera.json'))
+    recorder_config = config.load_from_file(os.path.join(module_dir, 'config/recorder.json'))
 
     eventport = network_config['event_pub_port']
     videoport = network_config['h264_pub_port']

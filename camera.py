@@ -2,6 +2,7 @@
 
 # General modules
 import io
+import os
 import sys
 import zmq
 import picamera
@@ -66,9 +67,11 @@ def motion_event_handler(eventsocket):
 def main():
     log.info('Starting camera feed server on %s.', hostname)
     
-    motion_config = config.load_from_file('config/motion.json')
-    camera_config = config.load_from_file('config/camera.json')
-    network_config = config.load_from_file('config/network.json')
+    module_dir = os.path.dirname(__file__) 
+    
+    motion_config = config.load_from_file(os.path.join(module_dir, 'config/motion.json'))
+    camera_config = config.load_from_file(os.path.join(module_dir, 'config/camera.json'))
+    network_config = config.load_from_file(os.path.join(module_dir, 'config/network.json'))
     
     magnitude_threshold = motion_config['magnitude_threshold']
     block_threshold = motion_config['block_threshold']
