@@ -4,5 +4,5 @@
   "resolution_x":        1920,
   "resolution_y":        1080,
   "vflip":               1,
-  "hflip":               0
+  "hflip":               1
 }
