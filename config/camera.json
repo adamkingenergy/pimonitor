@@ -2,5 +2,7 @@
   "bitrate":             800000,
   "framerate":           10,
   "resolution_x":        1920,
-  "resolution_y":        1080
+  "resolution_y":        1080,
+  "vflip":               1,
+  "hflip":               0
 }

@@ -79,6 +79,8 @@ def main():
     bitrate = camera_config['bitrate']
     framerate = camera_config['framerate']
     resolution = camera_config['resolution_x'], camera_config['resolution_y']
+    vflip = True if camera_config['vflip'] else False
+    hflip = True if camera_config['hflip'] else False
 
     net_frame_size = network_config['net_frame_size']
     eventport = network_config['event_pub_port']
@@ -109,6 +111,8 @@ def main():
         log.info('Starting camera video capture.')
         camera.resolution = resolution
         camera.framerate = framerate
+        camera.vflip = vflip
+        camera.hflip = hflip
         camera.start_recording(video_output,
                                motion_output=motion_detector,
                                format='h264', 
