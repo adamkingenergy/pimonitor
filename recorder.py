@@ -57,12 +57,12 @@ def main():
                 if host not in files:
                     # We're lacking a current output pipe for this host.
                     starttime = datetime.datetime.now()
-                    newfilename = '%s%s-%s.mp4' % (recording_folder, host, starttime.strftime("%Y%m%d-%H%M%S"))
+                    vidfile = '%s%s-%s.mp4' % (recording_folder, host, starttime.strftime("%Y%m%d-%H%M%S"))
                     
-                    vidproc = Popen(['ffmpeg', '-f', 'h264', '-i', '-', '-codec', 'copy', '-r', '%i' % framerate, newfilename], stdin=PIPE)
+                    vidproc = Popen(['ffmpeg', '-f', 'h264', '-i', '-', '-codec', 'copy', '-r', '%i' % framerate, vidfile], stdin=PIPE)
                 else:
                     # Retrieve the video output pipe
-                    vidproc, starttime = files[host] 
+                    vidproc, vidfile, starttime = files[host] 
 
                 # Write the data we received on our subscription
                 try:
@@ -78,31 +78,50 @@ def main():
 
                 # If the video is now longer than the prescribed duration, we should close it and clean it.
                 if datetime.datetime.now() > starttime + datetime.timedelta(seconds=max_duration):
-                    vidproc.stdin.close()
-                    vidproc.wait()
-                    del files[host]
-                    assert os.path.isfile(newfilename), 'FFMPEG was unable to create the MP4 output file.'
+                    closeout_video(files, host)
                 else:
-                    files[host] = (vidproc, starttime)
-    
+                    files[host] = (vidproc, vidfile, starttime)
+
+            else:
+                # We've not received any data for a while, close off any files past their duration.
+                check_all_closeout_videos(files, max_duration)
+                
     except Exception as ex:
-        for host, (vidproc, starttime) in files.iteritems():
-            vidproc.stdin.close()
-            vidproc.wait()
-            assert os.path.isfile(newfilename), 'FFMPEG was unable to create the MP4 output file.'
+        check_all_closeout_videos(files, max_duration)
         raise
 
 
+def closeout_video(files, host):
+    """Closeout the video file for the specified host.
+    """
+    vidproc, vidfile, starttime = files[host]
+    vidproc.stdin.close()
+    vidproc.wait()
+    del files[host]
+    assert os.path.isfile(vidfile), 'FFMPEG was unable to create the MP4 output file.'
+    log.info('Closed out video file: %s', vidfile)
+    
+
+def check_all_closeout_videos(files, max_duration):
+    """Close any videos which have exceeded the max duration.
+    """
+    for host, (vidproc, vidfile, starttime) in files.iteritems():
+        if datetime.datetime.now() > starttime + datetime.timedelta(seconds=max_duration):
+            closeout_video(files, host)
+
+
 if __name__ == '__main__':
+
+    # Setting up logging.
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
-
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
+    # Start the recorder.
     main()
 
 

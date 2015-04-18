@@ -11,8 +11,8 @@ import logging
 
 # Project modules
 import config
-import motiondetection
-import zmqoutput
+from motion.motiondetection import VectorThresholdMotionDetect
+from data.zmqoutput import ZeroMqOutput
 
 log = logging.getLogger(__name__)
 hostname = socket.gethostname()
@@ -96,12 +96,12 @@ def main():
     jpegsocket.bind('tcp://*:%s' % jpegport)
 
     with picamera.PiCamera() as camera, \
-         zmqoutput.ZeroMqOutput(videosocket, hostname, net_frame_size) as video_output, \
-         motiondetection.VectorThresholdMotionDetect(motion_event_handler, 
-                                                     magnitude_threshold,
-                                                     block_threshold,
-                                                     eventsocket,
-                                                     camera) as motion_detector:
+         ZeroMqOutput(videosocket, hostname, net_frame_size) as video_output, \
+         VectorThresholdMotionDetect(motion_event_handler, 
+                                     magnitude_threshold,
+                                     block_threshold,
+                                     eventsocket,
+                                     camera) as motion_detector:
 
         log.info('Starting camera video capture.')
         camera.resolution = resolution
