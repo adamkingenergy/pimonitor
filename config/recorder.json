@@ -1,11 +1,15 @@
 {
   "network":
-    {"camera_ip_addr":      "192.168.0.2",
+    {"camera_ip_addr":      "cctvdoor",
      "event_sub_port":      5875,
      "h264_sub_port":       5876,
      "net_frame_size":      4096},
 
+  "camera":
+    {"framerate":           10},
+
   "recorder":
-    {"event_log":           "~/cctvevents.log",
-     "recording_folder":    "~/cctvrecordings/"}
+    {"event_log":           "/home/kingadam/cctvevents.log",
+     "recording_folder":    "/home/kingadam/cctvrecordings/",
+     "max_duration":        600}
 }

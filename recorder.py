@@ -2,10 +2,13 @@
 
 # General modules
 import sys
+import os
 import zmq
 import logging
 import socket
 import datetime
+import errno
+from subprocess import Popen, PIPE
 
 # Project modules
 import config
@@ -24,6 +27,11 @@ def main():
     eventport = configdata['network']['event_sub_port']
     videoport = configdata['network']['h264_sub_port']
 
+    framerate = configdata['camera']['framerate']
+
+    max_duration = configdata['recorder']['max_duration']
+    recording_folder = configdata['recorder']['recording_folder']
+
     context = zmq.Context()
     log.info('Connecting to camera event feed: %s:%i.', cameraip, eventport)
     eventsocket = context.socket(zmq.SUB)
@@ -36,33 +44,52 @@ def main():
     videosocket.setsockopt(zmq.SUBSCRIBE, '')
 
     files = {}
+    
+    poller = zmq.Poller()
+    poller.register(videosocket, zmq.POLLIN)
 
     try:
         while True:
-            log.debug('Waiting to receive video publish.')
-            host, flag, data = videosocket.recv_multipart()
-
-            if flag == 'START':
-                log.debug('START feed from %s', host)
-                if host in files:
-                    files[host].close()
+            socks = dict(poller.poll(5000))
+            if videosocket in socks and socks[videosocket] == zmq.POLLIN: 
+                host, data = videosocket.recv_multipart()
                 
-                newfilename = '%s-%s.h264' % (host, datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
-                files[host] = open(newfilename, 'wb')
+                if host not in files:
+                    # We're lacking a current output pipe for this host.
+                    starttime = datetime.datetime.now()
+                    newfilename = '%s%s-%s.mp4' % (recording_folder, host, starttime.strftime("%Y%m%d-%H%M%S"))
+                    
+                    vidproc = Popen(['ffmpeg', '-f', 'h264', '-i', '-', '-codec', 'copy', '-r', '%i' % framerate, newfilename], stdin=PIPE)
+                else:
+                    # Retrieve the video output pipe
+                    vidproc, starttime = files[host] 
 
-            elif flag == 'END':
-                log.debug('END feed from %s', host)
-                if host in files:
-                    files[host].close()
- 
-            elif flag == 'DATA':
-                if host in files:
-                    files[host].write(data)
-                    files[host].flush()
+                # Write the data we received on our subscription
+                try:
+                    vidproc.stdin.write(data)
+                except IOError as e:
+                    if e.errno == errno.EPIPE or e.errno == errno.EINVAL:
+                        # Stop loop on "Invalid pipe" or "Invalid argument".
+                        # No sense in continuing with broken pipe.
+                        break
+                    else:
+                        # Raise any other error.
+                        raise
+
+                # If the video is now longer than the prescribed duration, we should close it and clean it.
+                if datetime.datetime.now() > starttime + datetime.timedelta(seconds=max_duration):
+                    vidproc.stdin.close()
+                    vidproc.wait()
+                    del files[host]
+                    assert os.path.isfile(newfilename), 'FFMPEG was unable to create the MP4 output file.'
+                else:
+                    files[host] = (vidproc, starttime)
     
     except Exception as ex:
-        for vidfile in files.itervalues():
-            vidfile.close()
+        for host, (vidproc, starttime) in files.iteritems():
+            vidproc.stdin.close()
+            vidproc.wait()
+            assert os.path.isfile(newfilename), 'FFMPEG was unable to create the MP4 output file.'
         raise
 
 
@@ -76,8 +103,6 @@ if __name__ == '__main__':
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
-
     main()
-
 
 
