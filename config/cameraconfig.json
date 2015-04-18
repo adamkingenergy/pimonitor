@@ -13,7 +13,7 @@
      "resolution_y":        1080},
 
   "motion":
-    {"magnitude_threshold": 30,
-     "block_threshold":     15}
+    {"magnitude_threshold": 60,
+     "block_threshold":     30}
 }
 

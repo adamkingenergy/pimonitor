@@ -11,5 +11,5 @@
   "recorder":
     {"event_log":           "/home/kingadam/cctvevents.log",
      "recording_folder":    "/home/kingadam/cctvrecordings/",
-     "max_duration":        600}
+     "max_duration":        1200}
 }
