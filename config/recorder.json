@@ -1,15 +1,7 @@
 {
-  "network":
-    {"camera_ip_addr":      "cctvdoor",
-     "event_sub_port":      5875,
-     "h264_sub_port":       5876,
-     "net_frame_size":      4096},
-
-  "camera":
-    {"framerate":           10},
-
-  "recorder":
-    {"event_log":           "/home/kingadam/cctvevents.log",
-     "recording_folder":    "/home/kingadam/cctvrecordings/",
-     "max_duration":        1200}
+  "event_log":           "/home/kingadam/cctvevents.log",
+  "event_log_format":    "%(time)s - %(host)s - %(event)s",
+  "recording_folder":    "/home/kingadam/cctvrecordings/",
+  "max_duration":        600,
+  "camera_ip_addrs":     ["cctvdoor"]
 }

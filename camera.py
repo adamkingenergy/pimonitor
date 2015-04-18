@@ -60,27 +60,27 @@ def motion_event_handler(eventsocket):
     """Handle motion event using specified event socket.
     """
     log.info('Motion event detected.')
-    eventsocket.send_multipart([hostname, 'MOTION:%s' % datetime.datetime.now().isoformat()])
+    eventsocket.send_multipart([hostname, 'MOTION', datetime.datetime.now().isoformat()])
 
 
 def main():
     log.info('Starting camera feed server on %s.', hostname)
     
-    configfile = 'config/cameraconfig.json'
-    log.info('Loading config from %s.', configfile)
-    configdata = config.load_from_file(configfile)
+    motion_config = config.load_from_file('config/motion.json')
+    camera_config = config.load_from_file('config/camera.json')
+    network_config = config.load_from_file('config/network.json')
     
-    magnitude_threshold = configdata['motion']['magnitude_threshold']
-    block_threshold = configdata['motion']['block_threshold']
+    magnitude_threshold = motion_config['magnitude_threshold']
+    block_threshold = motion_config['block_threshold']
 
-    bitrate = configdata['camera']['bitrate']
-    framerate = configdata['camera']['framerate']
-    resolution = configdata['camera']['resolution_x'], configdata['camera']['resolution_y']
+    bitrate = camera_config['bitrate']
+    framerate = camera_config['framerate']
+    resolution = camera_config['resolution_x'], camera_config['resolution_y']
 
-    net_frame_size = configdata['network']['net_frame_size']
-    eventport = configdata['network']['event_pub_port']
-    videoport = configdata['network']['h264_pub_port']
-    jpegport = configdata['network']['jpeg_router_port']
+    net_frame_size = network_config['net_frame_size']
+    eventport = network_config['event_pub_port']
+    videoport = network_config['h264_pub_port']
+    jpegport = network_config['jpeg_router_port']
     
     context = zmq.Context()
     log.info('Binding event publish socket to port %i.', eventport)

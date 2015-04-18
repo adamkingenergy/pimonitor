@@ -11,7 +11,7 @@ def load_from_file(filename):
   and return as python dictionary.
   """
   with open(filename, 'r') as configfile:
-    log.debug('Config opened (%s), reading JSON.', filename)
+    log.info('Reading config from %s.', filename)
     return json.load(configfile)
 
 
