@@ -18,7 +18,7 @@ from data.zmqoutput import ZeroMqOutput
 log = logging.getLogger(__name__)
 hostname = socket.gethostname()
 
-def stills_event_loop(jpegsocket, camera, net_frame_size):
+def stills_event_loop(jpegsocket, camera, net_frame_sizei, annotate_text):
     """This function handles any incoming requests for JPEG stills.
     Any clients requesting stills receive back chunks of the file
     and must send continuation requests.
@@ -30,7 +30,7 @@ def stills_event_loop(jpegsocket, camera, net_frame_size):
     jpeg_requests = {}
 
     while True:
-        socks = dict(poller.poll())
+        socks = dict(poller.poll(100))
         if jpegsocket in socks and socks[jpegsocket] == zmq.POLLIN:
             address, empty, req = jpegsocket.recv_multipart()
 
@@ -55,6 +55,8 @@ def stills_event_loop(jpegsocket, camera, net_frame_size):
                 data = b''
         
             jpegsocket.send_multipart([address, b'', data])
+
+        camera.annotate_text = annotate_text % datetime.datetime.now().isoformat() 
 
 
 def motion_event_handler(eventsocket):
@@ -120,8 +122,9 @@ def main():
                                bitrate=bitrate)
         
         try:
-            log.info('Entering JPEG still event loop.')        
-            stills_event_loop(jpegsocket, camera, net_frame_size)
+            log.info('Entering JPEG still event loop.')
+            annotation = hostname + ' - %s'
+            stills_event_loop(jpegsocket, camera, net_frame_size, annotation)
         finally:
             camera.stop_recording()
 
