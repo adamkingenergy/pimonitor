@@ -73,7 +73,15 @@ def main():
                     if host not in files:
                         # We're lacking a current output pipe for this host.
                         starttime = datetime.datetime.now()
-                        vidfile = '%s%s-%s.mp4' % (recording_folder, host, starttime.strftime("%Y%m%d-%H%M%S"))
+                        date_folder = os.path.join(recording_folder, starttime.date().isoformat())
+                        
+                        try:
+                            os.makedirs(date_folder)
+                        except OSError as exception:
+                            if exception.errno != errno.EEXIST:
+                                raise
+                        
+                        vidfile = os.path.join(date_folder, '%s-%s.mp4' % (host, starttime.strftime("%Y%m%d-%H%M%S")))
                     
                         vidproc = Popen(['ffmpeg', '-f', 'h264', '-i', '-', '-codec', 'copy', '-r', '%i' % framerate, vidfile], stdin=PIPE)
                     else:
