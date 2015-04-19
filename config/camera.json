@@ -1,6 +1,6 @@
 {
-  "bitrate":             800000,
-  "framerate":           10,
+  "bitrate":             1000000,
+  "framerate":           15,
   "resolution_x":        1920,
   "resolution_y":        1080,
   "vflip":               1,
