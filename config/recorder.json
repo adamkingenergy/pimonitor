@@ -1,7 +1,7 @@
 {
-  "event_log":           "/home/kingadam/cctvevents.log",
+  "event_log":           "/run/media/kingadam/CCTV/cctvevents.log",
   "event_log_format":    "%(time)s - %(host)s - %(event)s",
-  "recording_folder":    "/home/kingadam/cctvrecordings/",
+  "recording_folder":    "/run/media/kingadam/CCTV/",
   "max_duration":        600,
   "camera_ip_addrs":     ["cctvdoor"]
 }
