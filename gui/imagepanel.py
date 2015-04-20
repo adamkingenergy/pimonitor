@@ -22,7 +22,8 @@ class ImagePanel(wx.Panel):
 
     def update_image(self, image_stream):
         """Update the bitmap with the specified stream."""
-        log.debug('Updating image from stream.')
-        self.bitmap.SetBitmap(wx.BitmapFromImage(wx.ImageFromStream(image_stream)))
+        img = wx.ImageFromStream(image_stream)
+        img = img.Scale(*self.Size)
+        self.bitmap.SetBitmap(wx.BitmapFromImage(img))
 
  

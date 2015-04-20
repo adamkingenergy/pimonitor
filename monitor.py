@@ -80,7 +80,7 @@ class MonitorFrame(wx.Frame):
         while True:
             socks = dict(poller.poll(100))
             for sock, status in socks.iteritems():
-                if sock in jpegsockets.items() and status == zmq.POLLIN: 
+                if sock in jpegsockets.values() and status == zmq.POLLIN: 
                     data = sock.recv()
                     if data:
                         ongoing_reqs[jpegsocketstoip[sock]].write(data)
