@@ -48,6 +48,7 @@ def stills_event_loop(jpegsocket, camera, net_frame_size, hostname, annotation, 
 
             elif req == 'NEXT':
                 # Check for still in progress and send next frame.
+                log.debug('Next frame requested by %s.', address)
                 data = jpeg_requests[address].read(net_frame_size)
 
             elif req == 'ENDACK':

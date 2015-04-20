@@ -94,7 +94,7 @@ class MonitorFrame(wx.Frame):
                         sock.recv()
 
                 elif sock in eventsockets and status == zmq.POLLIN: 
-                    host, data = sock.recv_multipart()
+                    _ = sock.recv_multipart()
             
             for ip in camera_ip_addrs:
                 if ip not in ongoing_reqs and datetime.datetime.now() > last_reqs[ip] + datetime.timedelta(seconds=reload_delay):
