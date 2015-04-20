@@ -11,7 +11,7 @@ class ImagePanel(wx.Panel):
     def __init__(self, parent):
         """Constructor"""
         wx.Panel.__init__(self, parent)
-        self.bitmap = wx.StaticBitmap(self, wx.ID_ANY, wx.EmptyBitmap(1, 1))
+        self.bitmap = wx.StaticBitmap(self, wx.ID_ANY, wx.EmptyBitmap(640, 480))
         self.Bind(wx.EVT_LEFT_UP, self.on_click)
  
     def on_click(self, event):

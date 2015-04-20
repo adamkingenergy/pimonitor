@@ -20,10 +20,12 @@ log = logging.getLogger(__name__)
 class MonitorFrame(wx.Frame):
     """Frame holding image panel for monitor which runs maximised."""
  
-    def __init__(self):
+    def __init__(self, hostname):
         """Constructor"""
         wx.Frame.__init__(self, None, title="Camera Monitor")
         
+        self.hostname = hostname
+
         log.info('Loading network and monitor configuration files.')
         module_dir = os.path.dirname(__file__)
         self.network_config = config.load_from_file(os.path.join(module_dir, 'config/network.json'))
@@ -60,6 +62,7 @@ class MonitorFrame(wx.Frame):
 
             log.info('Connecting to camera JPEG feed: %s:%i.', cameraip, jpegport)
             jpegsocket = context.socket(zmq.REQ)
+            jpegsocket.setsockopt(zmq.IDENTITY, self.hostname)
             jpegsocket.connect('tcp://%s:%s' % (cameraip, jpegport))
             jpegsockets[cameraip] = jpegsocket
             jpegsocketstoip[jpegsocket] = cameraip
@@ -77,7 +80,7 @@ class MonitorFrame(wx.Frame):
         while True:
             socks = dict(poller.poll(100))
             for sock, status in socks.iteritems():
-                if sock in jpegsocket.items() and status == zmq.POLLIN: 
+                if sock in jpegsockets.items() and status == zmq.POLLIN: 
                     data = sock.recv()
                     if data:
                         ongoing_reqs[jpegsocketstoip[sock]].write(data)
@@ -111,8 +114,10 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
+    hostname = socket.gethostname()
+
     app = wx.App(False)
-    frame = MonitorFrame()
+    frame = MonitorFrame(hostname)
     app.MainLoop()
 
 
