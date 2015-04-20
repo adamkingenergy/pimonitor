@@ -12,8 +12,8 @@
 
 # Change the next 3 lines to suit where you install your script and what you want to call it
 DIR=/usr/local/bin/pimonitor
-DAEMON=$DIR/camera.py
-DAEMON_NAME=pimonitorcam
+DAEMON=$DIR/recorder.py
+DAEMON_NAME=pimonitorrec
 
 # Add any command line options for your daemon here
 DAEMON_OPTS=""
