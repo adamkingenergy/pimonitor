@@ -42,7 +42,7 @@ def stills_event_loop(jpegsocket, camera, net_frame_size, hostname, annotation, 
 
                 # Create new stream and capture image to memory.
                 jpeg_requests[address] = io.BytesIO()
-                camera.capture(jpeg_requests[address], use_video_port=True)
+                camera.capture(jpeg_requests[address], format='jpeg', use_video_port=True)
                 data = jpeg_requests[address].read(net_frame_size)
 
             elif req == 'NEXT':
