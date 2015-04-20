@@ -18,7 +18,7 @@ from data.zmqoutput import ZeroMqOutput
 log = logging.getLogger(__name__)
 hostname = socket.gethostname()
 
-def stills_event_loop(jpegsocket, camera, net_frame_size, hostname, annotation, annotation_strfime):
+def stills_event_loop(jpegsocket, camera, net_frame_size, hostname, annotation, annotation_strftime):
     """This function handles any incoming requests for JPEG stills.
     Any clients requesting stills receive back chunks of the file
     and must send continuation requests.
