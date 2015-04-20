@@ -1,0 +1,4 @@
+{
+  "camera_ip_addrs":     ["cctvdoor"],
+  "image_reload_delay":  2
+}
