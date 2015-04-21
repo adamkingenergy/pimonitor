@@ -43,6 +43,8 @@ class MonitorFrame(wx.Frame):
     def image_retrieval_loop(self):
         reload_delay = self.monitor_config['image_reload_delay']
         camera_ip_addrs = self.monitor_config['camera_ip_addrs']
+        xres = self.monitor_config['xres']
+        yres = self.monitor_config['yres']
 
         eventport = self.network_config['event_pub_port']
         jpegport = self.network_config['jpeg_router_port']
@@ -100,7 +102,7 @@ class MonitorFrame(wx.Frame):
                 if ip not in ongoing_reqs and datetime.datetime.now() > last_reqs[ip] + datetime.timedelta(seconds=reload_delay):
                     last_reqs[ip] = datetime.datetime.now()
                     ongoing_reqs[ip] = io.BytesIO()
-                    jpegsockets[ip].send('NEW') 
+                    jpegsockets[ip].send('NEW %i %i' % (xres, yres)) 
 
  
 if __name__ == "__main__":

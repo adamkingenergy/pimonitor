@@ -1,4 +1,6 @@
 {
   "camera_ip_addrs":     ["cctvdoor"],
-  "image_reload_delay":  5
+  "image_reload_delay":  5,
+  "xres":  480,
+  "yres":  320
 }

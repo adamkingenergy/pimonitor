@@ -34,7 +34,9 @@ def stills_event_loop(jpegsocket, camera, net_frame_size, hostname, annotation, 
         if jpegsocket in socks and socks[jpegsocket] == zmq.POLLIN:
             address, empty, req = jpegsocket.recv_multipart()
 
-            if req == 'NEW':
+            req = req.split(' ')
+
+            if req[0] == 'NEW':
                 log.info('Request for JPEG still received from %s.', address)
                 if address in jpeg_requests:
                     jpeg_requests[address].close()
@@ -42,16 +44,17 @@ def stills_event_loop(jpegsocket, camera, net_frame_size, hostname, annotation, 
 
                 # Create new stream and capture image to memory.
                 jpeg_requests[address] = io.BytesIO()
-                camera.capture(jpeg_requests[address], format='jpeg', use_video_port=True)
+                imgdim = None if len(req) == 1 else map(int, req[1:])
+                camera.capture(jpeg_requests[address], resize=imgdim, format='jpeg', use_video_port=True)
                 jpeg_requests[address].seek(0)
                 data = jpeg_requests[address].read(net_frame_size)
 
-            elif req == 'NEXT':
+            elif req[0] == 'NEXT':
                 # Check for still in progress and send next frame.
                 log.debug('Next frame requested by %s.', address)
                 data = jpeg_requests[address].read(net_frame_size)
 
-            elif req == 'ENDACK':
+            elif req[0] == 'ENDACK':
                 # Transfer is complete and file acknowledged.
                 log.info('JPEG still transfer to %s acknowledged complete.', address)
                 data = b''
