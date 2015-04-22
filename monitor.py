@@ -94,6 +94,7 @@ class MonitorFrame(wx.Frame):
                         del ongoing_reqs[jpegsocketstoip[sock]]
                         sock.send('ENDACK')
                         sock.recv()
+                        log.debug('Still fully transferred and ending acknowledged.')
 
                 elif sock in eventsockets and status == zmq.POLLIN: 
                     _ = sock.recv_multipart()
@@ -102,6 +103,7 @@ class MonitorFrame(wx.Frame):
                 if ip not in ongoing_reqs and datetime.datetime.now() > last_reqs[ip] + datetime.timedelta(seconds=reload_delay):
                     last_reqs[ip] = datetime.datetime.now()
                     ongoing_reqs[ip] = io.BytesIO()
+                    log.debug('Sending request to %s for new still with resolution (%i, %i).', ip, xres, yres)
                     jpegsockets[ip].send('NEW %i %i' % (xres, yres)) 
 
  
