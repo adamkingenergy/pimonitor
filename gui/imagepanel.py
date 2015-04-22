@@ -11,13 +11,15 @@ class ImagePanel(wx.Panel):
     def __init__(self, parent):
         """Constructor"""
         wx.Panel.__init__(self, parent)
-        self.bitmap = wx.StaticBitmap(self, wx.ID_ANY, wx.EmptyBitmap(640, 480))
-        self.Bind(wx.EVT_LEFT_UP, self.on_click)
+        self.bitmap = wx.StaticBitmap(self, wx.ID_ANY, wx.EmptyBitmap(1, 1))
+        self.bitmap.Bind(wx.EVT_LEFT_UP, self.on_click)
  
     def on_click(self, event):
         """Click event handler to check where was clicked and dispatch relevant event."""
         # Here we add behaviour to check click position and
         # take appropriate action.
+        pos = event.GetPosition()
+        log.debug('Image panel was clicked at %s.', pos)
         pass
 
     def update_image(self, image_stream):
