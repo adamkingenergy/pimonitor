@@ -97,7 +97,7 @@ class MonitorFrame(wx.Frame):
                         log.debug('Still fully transferred and ending acknowledged.')
 
                 elif sock in eventsockets and status == zmq.POLLIN: 
-                    log.debug('Event received from %s.', jpegsocketstoip[sock])
+                    log.debug('Event message received on subscription.')
                     _ = sock.recv_multipart()
             
             for ip in camera_ip_addrs:
