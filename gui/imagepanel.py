@@ -26,6 +26,8 @@ class ImagePanel(wx.Panel):
         """Update the bitmap with the specified stream."""
         img = wx.ImageFromStream(image_stream)
         img = img.Scale(*self.Size)
+        oldimg = self.bitmap.GetBitmap()
         self.bitmap.SetBitmap(wx.BitmapFromImage(img))
-
+        oldimg.Destroy()
+        image_stream.close()
  
