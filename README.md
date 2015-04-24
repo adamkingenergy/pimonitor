@@ -3,21 +3,17 @@ Distributed CCTV monitoring and recording on RPi.
 
 ### Description
 
-pimonitor creates three node types:
+pimonitor is a modular CCTV solution which allows high-quality video to be quickly transported away from cameras and stored on dedicated recorders or viewed on monitors.  The system is specifically designed to be run on the low-power and low-cost Raspberrry Pi, making full use of the GPU for high-quality video recording encoded in h264.  The configuration is flexible so your system may for example include multiple cameras or monitors, or omit recording if you like.  A complete system of camera, recorder and monitor can be put together for around £100.
 
-1. Camera - Sources video from the Raspberry Pi camera module, processes it for motion detection and then streams the resulting video and event data to any subscribing nodes.
-1. Recorder - Subscribes to the video and event feeds from camera modules and translates raw h264 into archived MP4 files.  It also processes and logs the motion event feed.
-1. Monitor - Subscribes to camera event feeds and displays activity on screen when motion detected.
-
-This system allows the high-quality captured footage to be quickly transported away from the cameras (which could be subject to physical attack) and to separate dedicated recorders and monitors.  The recommended video quality settings are 1920x1080 resolution at 15 fps with bitrate at 1Mbit/s which gives a very clear recording and allows a fortnight of footage to fit easily on cheap commercial hard-drives.
+The recommended video quality settings are 1920x1080 resolution at 15 fps with bitrate at 1Mbit/s which gives a very clear recording and easily allows a month of footage to fit on cheap hard-drives.
 
 
 ### Dependencies
 
-- picamera
-- pyzmq
-- wxPython
-- ffmpeg
+- [picamera](http://picamera.readthedocs.org) - Camera module only
+- [pyzmq](http://pyzmq.github.io/pyzmq) - Data transport
+- [wxPython](http://www.wxpython.org) - Monitor module only
+- [ffmpeg](http://www.ffmpeg.org) - Recorder module only [(Raspberry Pi build instructions)](http://www.jeffreythompson.org/blog/2014/11/13/installing-ffmpeg-for-raspberry-pi/)
 
 
 ### Daemon Setup
