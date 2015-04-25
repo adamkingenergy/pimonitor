@@ -2,5 +2,5 @@
   "event_pub_port":      5875,
   "h264_pub_port":       5876,
   "jpeg_router_port":    5877,
-  "net_frame_size":      4096
+  "net_frame_size":      1490
 }
